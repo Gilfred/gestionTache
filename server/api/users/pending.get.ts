@@ -1,7 +1,7 @@
 import prisma from '../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.auth || event.context.auth.role !== 'ADMIN') {
+  if (!event.context.auth || event.context.auth.role !== 'SUPER_ADMIN') {
     throw createError({
       statusCode: 403,
       statusMessage: 'Accès interdit'

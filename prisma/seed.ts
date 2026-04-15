@@ -10,13 +10,13 @@ async function main() {
     where: { email: 'admin@example.com' },
     update: {
       isValidated: true,
-      role: 'ADMIN'
+      role: 'SUPER_ADMIN'
     },
     create: {
       email: 'admin@example.com',
-      name: 'Admin',
+      name: 'Super Admin',
       password_hash: hashedPassword,
-      role: 'ADMIN',
+      role: 'SUPER_ADMIN',
       isValidated: true
     }
   })

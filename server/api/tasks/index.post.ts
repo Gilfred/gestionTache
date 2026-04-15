@@ -2,10 +2,12 @@ import prisma from '../../utils/prisma'
 import { sendTaskAssignedEmail } from '~~/server/utils/email'
 
 export default defineEventHandler(async (event) => {
-  if (!event.context.auth || event.context.auth.role !== 'ADMIN') {
+  const userRole = event.context.auth?.role
+
+  if (!event.context.auth || (userRole !== 'SUPER_ADMIN' && userRole !== 'RESPONSABLE')) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Seul un administrateur peut créer des tâches'
+      statusMessage: 'Seul un Super Admin ou un Responsable peut créer des tâches'
     })
   }
 

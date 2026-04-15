@@ -197,7 +197,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { user, isAdmin } = useAuth()
+const { user, isAdmin, isSuperAdmin, isResponsable } = useAuth()
 const { data: tasks, refresh: refreshTasks } = await useFetch('/api/tasks')
 const { data: users } = await useFetch('/api/users')
 const validatedUsers = computed(() => users.value?.filter(u => u.isValidated) || [])
@@ -291,7 +291,7 @@ const deleteTask = async (id) => {
 }
 
 const canSubmit = (task) => task.assigned_to === user.value.id && task.status !== 'SUBMITTED' && task.status !== 'DONE'
-const canRate = (task) => isAdmin.value && task.status === 'SUBMITTED'
+const canRate = (task) => isSuperAdmin.value && task.status === 'SUBMITTED'
 
 const submitTask = async (id) => {
   try {

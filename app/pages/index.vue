@@ -56,7 +56,7 @@
         </div>
       </div>
 
-      <div v-if="isAdmin && stats.submitted > 0" class="bg-indigo-50 border-l-4 border-indigo-400 p-4">
+      <div v-if="isSuperAdmin && stats.submitted > 0" class="bg-indigo-50 border-l-4 border-indigo-400 p-4">
         <div class="flex">
           <div class="flex-shrink-0">
             <svg class="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
@@ -100,7 +100,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { user, isAdmin } = useAuth()
+const { user, isAdmin, isSuperAdmin } = useAuth()
 const { data: tasks, pending } = await useFetch('/api/tasks')
 
 const filteredTasks = computed(() => {
