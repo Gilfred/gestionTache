@@ -1,0 +1,78 @@
+import nodemailer from 'nodemailer'
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+})
+
+export const sendEmail = async (to: string, subject: string, text: string, html?: string) => {
+  await transporter.sendMail({
+    from: `"Task Manager" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    text,
+    html,
+  })
+}
+
+// LOGIN
+export const sendLoginNotificationEmail = async (userEmail: string) => {
+  await sendEmail(
+    userEmail,
+    'Nouvelle connexion à votre compte',
+    `Vous venez de vous connecter le ${new Date().toLocaleString()}`
+  )
+}
+
+// TASK RATED
+export const sendTaskRatedEmail = async (
+  userEmail: string,
+  taskTitle: string,
+  rating: number,
+  feedback: string
+) => {
+  await sendEmail(
+    userEmail,
+    'Votre tâche a été notée',
+    `Tâche: ${taskTitle}\nNote: ${rating}/5\nFeedback: ${feedback}`
+  )
+}
+
+export const sendTaskAssignedEmail = async (
+    userEmail: string,
+    taskTitle: string,
+    dueDate: string
+  ) => {
+    await sendEmail(
+      userEmail,
+      'Nouvelle tâche attribuée',
+      `Bonjour,
+
+  Une nouvelle tâche vous a été attribuée : "${taskTitle}".
+
+  Date d'échéance : ${dueDate}
+
+  Veuillez vous connecter pour voir les détails.`
+    )
+}
+
+export const sendRegistrationEmail = async (
+    userEmail: string,
+    userName: string
+  ) => {
+    await sendEmail(
+      userEmail,
+      'Bienvenue - Création de compte réussie',
+      `Bonjour ${userName},
+
+  Votre compte a été créé avec succès.
+
+  Un administrateur doit valider votre inscription avant accès complet.
+
+  Cordialement,
+  L'équipe Task Manager`
+    )
+}

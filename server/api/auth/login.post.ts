@@ -2,6 +2,7 @@
 import { comparePassword } from '~~/server/utils/auth'
 import prisma from '../../utils/prisma'
 import { signToken } from '~~/server/utils/auth'
+import { sendLoginNotificationEmail } from '~~/server/utils/email'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -19,6 +20,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const token = signToken({ userId: user.id, role: user.role })
+
+  await sendLoginNotificationEmail(user.email)
 
   setCookie(event, 'auth_token', token, {
     httpOnly: true,

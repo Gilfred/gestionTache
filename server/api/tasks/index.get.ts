@@ -11,6 +11,14 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const { status, priority, assigned_to, search } = query
 
+  const user = await prisma.user.findUnique({
+    where: { id: event.context.auth.userId }
+  })
+
+  if (!user?.isValidated && user?.role !== 'ADMIN') {
+    return [] // Non-validated users see no tasks
+  }
+
   const where: any = {}
 
   if (status) where.status = status

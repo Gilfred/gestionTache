@@ -14,7 +14,8 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de création</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+            <th v-if="isAdmin" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -26,7 +27,14 @@
                 {{ user.role }}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ new Date(user.created_at).toLocaleDateString() }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <span :class="user.isValidated ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 rounded-full text-xs font-bold">
+                {{ user.isValidated ? 'Validé' : 'En attente' }}
+              </span>
+            </td>
+            <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <button v-if="!user.isValidated" @click="validateUser(user.id)" class="text-indigo-600 hover:text-indigo-900 font-bold">Valider</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -108,6 +116,18 @@ const createUser = async () => {
     form.email = ''
     form.role = 'USER'
     form.password = 'password123'
+  } catch (e) {
+    alert(e.data?.statusMessage || 'Une erreur est survenue')
+  }
+}
+
+const validateUser = async (userId) => {
+  try {
+    await $fetch(`/api/users/${userId}.validate`, {
+      method: 'POST',
+      body: { isValidated: true }
+    })
+    await refresh()
   } catch (e) {
     alert(e.data?.statusMessage || 'Une erreur est survenue')
   }
