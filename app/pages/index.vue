@@ -56,6 +56,22 @@
         </div>
       </div>
 
+      <div v-if="isAdmin && stats.submitted > 0" class="bg-indigo-50 border-l-4 border-indigo-400 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-indigo-700 font-bold">
+              Vous avez {{ stats.submitted }} tâche(s) en attente de notation.
+              <NuxtLink to="/tasks?status=SUBMITTED" class="underline ml-1">Voir les tâches à noter</NuxtLink>
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div v-if="!isAdmin && filteredTasks.length > 0" class="mt-8">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Mes tâches récentes</h3>
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
@@ -102,6 +118,7 @@ const stats = computed(() => {
   return {
     total: relevantTasks.length,
     inProgress: relevantTasks.filter(t => t.status === 'IN_PROGRESS').length,
+    submitted: relevantTasks.filter(t => t.status === 'SUBMITTED').length,
     done: relevantTasks.filter(t => t.status === 'DONE').length,
     overdue: relevantTasks.filter(t => t.status !== 'DONE' && t.due_date && new Date(t.due_date) < now).length
   }

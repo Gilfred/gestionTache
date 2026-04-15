@@ -7,6 +7,29 @@
       </button>
     </div>
 
+    <!-- Onglets de filtrage -->
+    <div class="mb-6 border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          @click="userFilter = 'all'"
+          :class="userFilter === 'all' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+        >
+          Tous les utilisateurs
+        </button>
+        <button
+          @click="userFilter = 'pending'"
+          :class="userFilter === 'pending' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center"
+        >
+          En attente de validation
+          <span v-if="pendingCount > 0" class="ml-2 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-bold">
+            {{ pendingCount }}
+          </span>
+        </button>
+      </nav>
+    </div>
+
     <div class="bg-white shadow-md rounded-xl overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -19,7 +42,7 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50 transition-colors">
+          <tr v-for="user in filteredUsers" :key="user.id" class="hover:bg-gray-50 transition-colors">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.name }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -95,6 +118,17 @@ definePageMeta({
 const { isAdmin } = useAuth()
 
 const { data: users, refresh } = await useFetch('/api/users')
+
+const userFilter = ref('all')
+const pendingCount = computed(() => users.value?.filter(u => !u.isValidated).length || 0)
+
+const filteredUsers = computed(() => {
+  if (!users.value) return []
+  if (userFilter.value === 'pending') {
+    return users.value.filter(u => !u.isValidated)
+  }
+  return users.value
+})
 
 const showModal = ref(false)
 const form = reactive({

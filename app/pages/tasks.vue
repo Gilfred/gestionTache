@@ -16,7 +16,7 @@
         <option value="">Tous les statuts</option>
         <option value="TODO">À faire</option>
         <option value="IN_PROGRESS">En cours</option>
-        <option value="SUBMITTED">Soumis</option>
+        <option value="SUBMITTED">Soumis (A noter)</option>
         <option value="DONE">Terminé</option>
       </select>
       <select v-model="filters.priority" class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
