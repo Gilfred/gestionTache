@@ -5,20 +5,35 @@ import { Prisma } from '@prisma/client'
 
 export default defineEventHandler(async (event) => {
 
-  // Compter le nombre d'utilisateurs existants
-  // (le premier utilisateur sera automatiquement ADMIN)
-  const userCount = await prisma.user.count()
-
   //Récupération des données envoyées par le client
   const body = await readBody(event)
   const { name, email, password, role } = body
 
+  // Vérifier si l'utilisateur existe déjà avant de compter
+  const existingUser = await prisma.user.findUnique({
+    where: { email }
+  })
+
+  if (existingUser) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'Cet email existe déjà'
+    })
+  }
+
+  // Compter le nombre d'utilisateurs existants
+  // (le premier utilisateur sera automatiquement ADMIN)
+  const userCount = await prisma.user.count()
+
   //Définir le rôle du premier utilisateur comme ADMIN
   const isFirstUser = userCount === 0
-  const userRole = isFirstUser ? 'ADMIN' : (role || 'USER')
+
+  // Seul un admin authentifié peut choisir un rôle ou valider un compte
+  const isAdminRequest = event.context.auth?.role === 'ADMIN'
+  const userRole = isFirstUser ? 'ADMIN' : (isAdminRequest ? (role || 'USER') : 'USER')
 
   //Le premier utilisateur est automatiquement validé
-  const isValidated = isFirstUser
+  const isValidated = isFirstUser || (isAdminRequest ? (body.isValidated || false) : false)
 
   // Hachage du mot de passe pour la sécurité
   const hashedPassword = await hashPassword(password || 'password123')
