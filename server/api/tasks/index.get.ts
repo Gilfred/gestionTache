@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     where: { id: event.context.auth.userId }
   })
 
-  if (!user?.isValidated && user?.role !== 'ADMIN') {
+  if (!user?.isValidated && user?.role !== 'SUPER_ADMIN') {
     return [] // Non-validated users see no tasks
   }
 
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
       assignedUser: {
         select: { id: true, name: true }
       },
-      creator: {
+      createdUser: {
         select: { id: true, name: true }
       }
     },

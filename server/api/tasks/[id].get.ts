@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
 
   // If task is DONE, and user is not the assignee or creator/admin, hide rating/feedback
   const userId = event.context.auth?.userId
-  const isAdmin = event.context.auth?.role === 'ADMIN'
+  const isAdmin = event.context.auth?.role === 'SUPER_ADMIN'
 
   if (task.status === 'DONE' && !isAdmin && task.assigned_to !== userId && task.created_by !== userId) {
     const { rating, feedback, ...taskWithoutRating } = task
