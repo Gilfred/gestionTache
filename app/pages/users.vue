@@ -118,6 +118,10 @@ definePageMeta({
 
 const { isAdmin, isSuperAdmin } = useAuth()
 
+if (!isAdmin.value) {
+  throw navigateTo('/')
+}
+
 const { data: users, refresh } = await useFetch('/api/users')
 
 const userFilter = ref('all')
