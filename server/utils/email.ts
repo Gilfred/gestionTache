@@ -78,3 +78,22 @@ export const sendRegistrationEmail = async (
   L'équipe Task Manager`
     )
 }
+
+export const sendAdminNotificationEmail = async (
+  adminEmail: string,
+  newUserEmail: string,
+  newUserName: string
+) => {
+  await sendEmail(
+    adminEmail,
+    'Nouvelle inscription à valider',
+    `Bonjour,
+
+  Un nouvel utilisateur s'est inscrit : ${newUserName} (${newUserEmail}).
+
+  Veuillez vous connecter au tableau de bord pour valider son compte afin qu'il puisse recevoir des tâches.
+
+  Cordialement,
+  L'équipe Task Manager`
+  )
+}

@@ -1,6 +1,6 @@
 import prisma from '../../utils/prisma'
 import { hashPassword } from '../../utils/auth'
-import { sendRegistrationEmail } from '../../utils/email'
+import { sendRegistrationEmail, sendAdminNotificationEmail } from '../../utils/email'
 import { Prisma } from '@prisma/client'
 
 export default defineEventHandler(async (event) => {
@@ -53,6 +53,16 @@ export default defineEventHandler(async (event) => {
 
     // Envoi d'un email de confirmation après création réussie
     await sendRegistrationEmail(user.email, user.name)
+
+    // Notifier le Super Admin s'il ne s'agit pas du premier utilisateur (qui est déjà admin)
+    if (!isFirstUser && !isValidated) {
+      const superAdmins = await prisma.user.findMany({
+        where: { role: 'SUPER_ADMIN' }
+      })
+      for (const admin of superAdmins) {
+        await sendAdminNotificationEmail(admin.email, user.email, user.name)
+      }
+    }
 
     // On enlève le mot de passe avant de renvoyer les données
     const { password_hash, ...userWithoutPassword } = user
