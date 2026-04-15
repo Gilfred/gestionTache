@@ -8,7 +8,7 @@
       </span>
     </div>
 
-    <div v-if="!user?.isValidated && !isAdmin" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+    <div v-if="user && !user.isValidated && !isAdmin" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
       <div class="flex">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -25,29 +25,54 @@
 
     <div v-if="pending" class="text-center py-10">Chargement...</div>
     
-    <div v-else-if="stats" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <dt class="text-sm font-medium text-gray-500 truncate">Total des tâches</dt>
-          <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ stats.total }}</dd>
+    <div v-else-if="stats" class="space-y-6">
+      <h2 class="text-lg font-medium text-gray-900">
+        {{ isAdmin ? 'Statistiques Globales' : 'Mes Statistiques' }}
+      </h2>
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Total des tâches</dt>
+            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ stats.total }}</dd>
+          </div>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">En cours</dt>
+            <dd class="mt-1 text-3xl font-semibold text-blue-600">{{ stats.inProgress }}</dd>
+          </div>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">Terminées</dt>
+            <dd class="mt-1 text-3xl font-semibold text-green-600">{{ stats.done }}</dd>
+          </div>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <dt class="text-sm font-medium text-gray-500 truncate">En retard</dt>
+            <dd class="mt-1 text-3xl font-semibold text-red-600">{{ stats.overdue }}</dd>
+          </div>
         </div>
       </div>
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <dt class="text-sm font-medium text-gray-500 truncate">En cours</dt>
-          <dd class="mt-1 text-3xl font-semibold text-blue-600">{{ stats.inProgress }}</dd>
-        </div>
-      </div>
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <dt class="text-sm font-medium text-gray-500 truncate">Terminées</dt>
-          <dd class="mt-1 text-3xl font-semibold text-green-600">{{ stats.done }}</dd>
-        </div>
-      </div>
-      <div class="bg-white overflow-hidden shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <dt class="text-sm font-medium text-gray-500 truncate">En retard</dt>
-          <dd class="mt-1 text-3xl font-semibold text-red-600">{{ stats.overdue }}</dd>
+
+      <div v-if="!isAdmin && filteredTasks.length > 0" class="mt-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Mes tâches récentes</h3>
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <ul class="divide-y divide-gray-200">
+            <li v-for="task in filteredTasks.slice(0, 5)" :key="task.id">
+              <div class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-indigo-600 truncate">{{ task.title }}</p>
+                  <div class="ml-2 flex-shrink-0 flex">
+                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" :class="task.status === 'DONE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                      {{ task.status }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -62,15 +87,23 @@ definePageMeta({
 const { user, isAdmin } = useAuth()
 const { data: tasks, pending } = await useFetch('/api/tasks')
 
+const filteredTasks = computed(() => {
+  if (!tasks.value) return []
+  if (isAdmin.value) return tasks.value
+  return tasks.value.filter(t => t.assigned_to === user.value?.id)
+})
+
 const stats = computed(() => {
   if (!tasks.value) return null
   
+  const relevantTasks = filteredTasks.value
   const now = new Date()
+
   return {
-    total: tasks.value.length,
-    inProgress: tasks.value.filter(t => t.status === 'IN_PROGRESS').length,
-    done: tasks.value.filter(t => t.status === 'DONE').length,
-    overdue: tasks.value.filter(t => t.status !== 'DONE' && t.due_date && new Date(t.due_date) < now).length
+    total: relevantTasks.length,
+    inProgress: relevantTasks.filter(t => t.status === 'IN_PROGRESS').length,
+    done: relevantTasks.filter(t => t.status === 'DONE').length,
+    overdue: relevantTasks.filter(t => t.status !== 'DONE' && t.due_date && new Date(t.due_date) < now).length
   }
 })
 </script>
