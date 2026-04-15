@@ -16,7 +16,7 @@
         <option value="">Tous les statuts</option>
         <option value="TODO">À faire</option>
         <option value="IN_PROGRESS">En cours</option>
-        <option value="SUBMITTED">Soumis</option>
+        <option value="SUBMITTED">Soumis (A noter)</option>
         <option value="DONE">Terminé</option>
       </select>
       <select v-model="filters.priority" class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -55,6 +55,9 @@
                 </span>
                 <span v-if="task.submittedAt" class="text-gray-400">
                   Durée: {{ calculateDuration(task.created_at, task.submittedAt) }}
+                </span>
+                <span v-if="task.submittedAt && task.due_date" :class="new Date(task.submittedAt) > new Date(task.due_date) ? 'text-red-600 font-bold' : 'text-green-600 font-bold'">
+                  {{ new Date(task.submittedAt) > new Date(task.due_date) ? '(En retard)' : '(À temps)' }}
                 </span>
               </div>
               <div v-if="task.feedback" class="mt-1 text-xs text-gray-400 italic">

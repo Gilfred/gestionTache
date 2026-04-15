@@ -22,11 +22,14 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const now = new Date()
+  let status: 'SUBMITTED' = 'SUBMITTED'
+  
   const updatedTask = await prisma.task.update({
     where: { id },
     data: {
-      status: 'SUBMITTED',
-      submittedAt: new Date()
+      status,
+      submittedAt: now
     }
   })
 
