@@ -3,8 +3,26 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  SUBMITTED
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 model User {
@@ -12,7 +30,8 @@ model User {
   name          String
   email         String   @unique
   password_hash String
-  role          String   @default("USER") // ADMIN or USER
+  role          Role     @default(USER)
+  isValidated   Boolean  @default(false)
   created_at    DateTime @default(now())
   
   tasks_assigned Task[] @relation("AssignedTasks")
@@ -20,13 +39,17 @@ model User {
 }
 
 model Task {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   title       String
   description String?
-  status      String   @default("TODO") // TODO, IN_PROGRESS, DONE
-  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  status      TaskStatus @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
   due_date    DateTime?
   
+  rating      Int?
+  feedback    String?
+  submittedAt DateTime?
+
   assigned_to Int?
   assignedUser User? @relation("AssignedTasks", fields: [assigned_to], references: [id])
   

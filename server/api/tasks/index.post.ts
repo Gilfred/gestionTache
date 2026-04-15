@@ -1,4 +1,5 @@
 import prisma from '../../utils/prisma'
+import { sendTaskAssignedEmail } from '~~/server/utils/email'
 
 export default defineEventHandler(async (event) => {
   if (!event.context.auth) {
@@ -20,8 +21,19 @@ export default defineEventHandler(async (event) => {
       due_date: due_date ? new Date(due_date) : null,
       assigned_to: assigned_to ? parseInt(assigned_to) : null,
       created_by: event.context.auth.userId
+    },
+    include: {
+      assignedUser: true
     }
   })
+
+  if (task.assignedUser && task.due_date) {
+    await sendTaskAssignedEmail(
+      task.assignedUser.email,
+      task.title,
+      task.due_date.toLocaleDateString()
+    )
+  }
 
   return task
 })

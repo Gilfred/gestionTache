@@ -16,13 +16,12 @@ export default defineEventHandler(async (event) => {
   const isTaskApi = path.startsWith('/api/tasks')
   
   if (isUserApi || isTaskApi) {
-    if (!event.context.auth) {
+    // Allow user registration (POST /api/users) without auth
+    if (isUserApi && event.method === 'POST') {
+      return
+    }
 
-      if (isUserApi && event.method === 'POST') {
-        const userCount = await prisma.user.count()
-        if (userCount === 0) return
-      }
-      
+    if (!event.context.auth) {
       throw createError({
         statusCode: 401,
         statusMessage: 'Non authentifié'
