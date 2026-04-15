@@ -45,7 +45,8 @@ model Task {
 }
 
 enum Role {
-  ADMIN
+  SUPER_ADMIN
+  RESPONSABLE
   USER
 }
 

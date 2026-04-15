@@ -2,7 +2,7 @@
   <div>
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Gestion des Tâches</h1>
-      <button @click="showCreateModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+      <button v-if="isAdmin" @click="showCreateModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
         Nouvelle Tâche
       </button>
     </div>
@@ -27,7 +27,7 @@
       </select>
       <select v-model="filters.assigned_to" class="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
         <option value="">Tous les utilisateurs</option>
-        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+        <option v-for="u in users" :key="u.id" :value="u.id">{{ u.name }}</option>
       </select>
     </div>
 
@@ -131,7 +131,7 @@
                     <label class="block text-sm font-medium text-gray-700">Assigné à</label>
                     <select v-model="form.assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm sm:text-sm p-2 border">
                       <option :value="null">Non assigné</option>
-                      <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                      <option v-for="u in validatedUsers" :key="u.id" :value="u.id">{{ u.name }}</option>
                     </select>
                   </div>
                 </div>
@@ -197,9 +197,10 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { user, isAdmin } = useAuth()
+const { user, isAdmin, isSuperAdmin, isResponsable } = useAuth()
 const { data: tasks, refresh: refreshTasks } = await useFetch('/api/tasks')
 const { data: users } = await useFetch('/api/users')
+const validatedUsers = computed(() => users.value?.filter(u => u.isValidated) || [])
 
 const filters = reactive({
   search: '',
@@ -290,7 +291,7 @@ const deleteTask = async (id) => {
 }
 
 const canSubmit = (task) => task.assigned_to === user.value.id && task.status !== 'SUBMITTED' && task.status !== 'DONE'
-const canRate = (task) => task.created_by === user.value.id && task.status === 'SUBMITTED'
+const canRate = (task) => isSuperAdmin.value && task.status === 'SUBMITTED'
 
 const submitTask = async (id) => {
   try {

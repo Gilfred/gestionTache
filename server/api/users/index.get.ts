@@ -12,14 +12,15 @@ export default defineEventHandler(async (event) => {
     where: { id: event.context.auth.userId }
   })
 
-  const isAdmin = user?.role === 'ADMIN'
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const isValidated = user?.isValidated
 
   const users = await prisma.user.findMany({
+    where: isSuperAdmin ? {} : { isValidated: true },
     select: {
       id: true,
       name: true,
-      email: (isAdmin || isValidated) ? true : false,
+      email: (isSuperAdmin || isValidated) ? true : false,
       role: true,
       isValidated: true,
       created_at: true

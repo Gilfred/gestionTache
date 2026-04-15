@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Gestion des Utilisateurs</h1>
-      <button @click="showModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all shadow-md">
+      <button v-if="isSuperAdmin" @click="showModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all shadow-md">
         Nouvel Utilisateur
       </button>
     </div>
@@ -46,7 +46,7 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.name }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <span :class="user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'" class="px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              <span :class="user.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' : (user.role === 'RESPONSABLE' ? 'bg-indigo-100 text-indigo-800' : 'bg-blue-100 text-blue-800')" class="px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                 {{ user.role }}
               </span>
             </td>
@@ -55,7 +55,7 @@
                 {{ user.isValidated ? 'Validé' : 'En attente' }}
               </span>
             </td>
-            <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td v-if="isSuperAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <button v-if="!user.isValidated" @click="validateUser(user.id)" class="text-indigo-600 hover:text-indigo-900 font-bold">Valider</button>
             </td>
           </tr>
@@ -86,7 +86,8 @@
                   <label class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
                   <select v-model="form.role" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm sm:text-sm p-3 border focus:ring-indigo-500 focus:border-indigo-500 bg-white">
                     <option value="USER">Utilisateur</option>
-                    <option value="ADMIN">Administrateur</option>
+                    <option value="RESPONSABLE">Responsable</option>
+                    <option value="SUPER_ADMIN">Super Admin</option>
                   </select>
                 </div>
                 <div>
@@ -115,7 +116,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { isAdmin } = useAuth()
+const { isAdmin, isSuperAdmin } = useAuth()
 
 const { data: users, refresh } = await useFetch('/api/users')
 

@@ -30,6 +30,8 @@ export const useAuth = () => {
     fetchUser,
     login,
     logout,
-    isAdmin: computed(() => user.value?.role === 'ADMIN')
+    isSuperAdmin: computed(() => user.value?.role === 'SUPER_ADMIN'),
+    isResponsable: computed(() => user.value?.role === 'RESPONSABLE'),
+    isAdmin: computed(() => user.value?.role === 'SUPER_ADMIN' || user.value?.role === 'RESPONSABLE')
   }
 }
