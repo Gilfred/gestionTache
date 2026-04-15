@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Compter le nombre d'utilisateurs existants
-  // (le premier utilisateur sera automatiquement ADMIN)
+  // (le premier utilisateur sera automatiquement SUPER_ADMIN)
   const userCount = await prisma.user.count()
 
   //Définir le rôle du premier utilisateur comme SUPER_ADMIN
