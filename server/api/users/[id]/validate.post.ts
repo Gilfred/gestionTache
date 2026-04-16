@@ -1,4 +1,4 @@
-import prisma from '../../utils/prisma'
+import prisma from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
   if (!event.context.auth || event.context.auth.role !== 'SUPER_ADMIN') {

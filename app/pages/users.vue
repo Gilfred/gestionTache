@@ -162,7 +162,7 @@ const createUser = async () => {
 
 const validateUser = async (userId) => {
   try {
-    await $fetch(`/api/users/${userId}.validate`, {
+    await $fetch(`/api/users/${userId}/validate`, {
       method: 'POST',
       body: { isValidated: true }
     })

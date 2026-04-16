@@ -38,6 +38,7 @@ model Task {
   rating       Int?
   feedback     String?
   submittedAt  DateTime?
+  created_at   DateTime   @default(now())
   assigned_to  Int?
   assignedUser User?     @relation("AssignedTasks", fields: [assigned_to], references: [id])
   created_by   Int
