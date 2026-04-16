@@ -176,8 +176,12 @@ definePageMeta({
 const { isAdmin, isSuperAdmin, user: currentUserAuth } = useAuth()
 
 const { data: users, refresh } = await useFetch('/api/users')
-const { data: pendingUsers, refresh: refreshPending } = await useFetch('/api/users/pending')
-const { data: allPermissions } = await useFetch('/api/users/permissions')
+const { data: pendingUsers, refresh: refreshPending } = isSuperAdmin.value
+  ? await useFetch('/api/users/pending')
+  : { data: ref([]), refresh: () => {} }
+const { data: allPermissions } = isAdmin.value
+  ? await useFetch('/api/users/permissions')
+  : { data: ref([]), refresh: () => {} }
 
 const userFilter = ref('all')
 const pendingCount = computed(() => pendingUsers.value?.length || 0)
