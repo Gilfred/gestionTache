@@ -8,7 +8,7 @@
     </div>
 
     <!-- Onglets de filtrage -->
-    <div class="mb-6 border-b border-gray-200">
+    <div v-if="isAdmin" class="mb-6 border-b border-gray-200">
       <nav class="-mb-px flex space-x-8">
         <button 
           @click="userFilter = 'all'" 
@@ -37,8 +37,8 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-            <th v-if="isAdmin" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th v-if="isAdmin" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+            <th v-if="isSuperAdmin" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -49,13 +49,13 @@
               <span :class="user.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' : (user.role === 'RESPONSABLE' ? 'bg-indigo-100 text-indigo-800' : 'bg-blue-100 text-blue-800')" class="px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                 {{ user.role }}
               </span>
-              <div class="mt-1 flex flex-wrap gap-1">
+              <div v-if="isAdmin" class="mt-1 flex flex-wrap gap-1">
                 <span v-for="p in user.permissions" :key="p.id" class="text-[10px] bg-gray-100 px-1 rounded text-gray-600">
                   {{ p.name }}
                 </span>
               </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span :class="user.isValidated ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 rounded-full text-xs font-bold">
                 {{ user.isValidated ? 'Validé' : 'En attente' }}
               </span>
@@ -173,11 +173,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { isAdmin, isSuperAdmin } = useAuth()
-
-if (!isAdmin.value) {
-  throw navigateTo('/')
-}
+const { isAdmin, isSuperAdmin, user: currentUserAuth } = useAuth()
 
 const { data: users, refresh } = await useFetch('/api/users')
 const { data: pendingUsers, refresh: refreshPending } = await useFetch('/api/users/pending')

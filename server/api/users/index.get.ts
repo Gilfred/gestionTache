@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   })
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
-  const isValidated = user?.isValidated
+  const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'RESPONSABLE'
 
   const users = await prisma.user.findMany({
     where: isSuperAdmin ? {} : { isValidated: true },
@@ -22,14 +22,14 @@ export default defineEventHandler(async (event) => {
       name: true,
       email: true,
       role: true,
-      isValidated: true,
-      created_at: true,
-      permissions: {
+      isValidated: isAdmin,
+      created_at: isAdmin,
+      permissions: isAdmin ? {
         select: {
           id: true,
           name: true
         }
-      }
+      } : false
     }
   })
   return users
