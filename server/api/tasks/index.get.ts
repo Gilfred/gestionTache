@@ -21,9 +21,19 @@ export default defineEventHandler(async (event) => {
 
   const where: any = {}
 
+  // Restriction for regular users
+  if (user?.role === 'USER') {
+    where.assigned_to = user.id
+  }
+
   if (status) where.status = status
   if (priority) where.priority = priority
-  if (assigned_to) where.assigned_to = parseInt(assigned_to as string)
+
+  if (user?.role === 'USER') {
+    where.assigned_to = user.id
+  } else if (assigned_to) {
+    where.assigned_to = parseInt(assigned_to as string)
+  }
   if (search) {
     where.title = {
       contains: search as string

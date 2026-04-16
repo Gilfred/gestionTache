@@ -22,10 +22,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id: userId } })
-  if (user?.role !== 'SUPER_ADMIN') {
+  if (user?.role !== 'SUPER_ADMIN' && (user?.role !== 'RESPONSABLE' || task.created_by !== userId)) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Seul le Super Admin peut noter les tâches'
+      statusMessage: 'Seul le Super Admin ou le créateur de la tâche peut la noter'
     })
   }
 

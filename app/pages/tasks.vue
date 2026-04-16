@@ -291,7 +291,7 @@ const deleteTask = async (id) => {
 }
 
 const canSubmit = (task) => task.assigned_to === user.value.id && task.status !== 'SUBMITTED' && task.status !== 'DONE'
-const canRate = (task) => isSuperAdmin.value && task.status === 'SUBMITTED'
+const canRate = (task) => (isSuperAdmin.value || (isResponsable.value && task.created_by === user.value.id)) && task.status === 'SUBMITTED'
 
 const submitTask = async (id) => {
   try {

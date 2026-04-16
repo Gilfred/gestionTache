@@ -18,6 +18,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Tâche non trouvée' })
   }
 
+  const currentUser = await prisma.user.findUnique({
+    where: { id: event.context.auth.userId }
+  })
+
+  // Restriction for regular users
+  if (currentUser?.role === 'USER' && task.assigned_to !== currentUser.id) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Accès interdit : vous ne pouvez consulter que vos propres tâches'
+    })
+  }
+
   // If task is DONE, and user is not the assignee or creator/admin, hide rating/feedback
   const userId = event.context.auth?.userId
   const isAdmin = event.context.auth?.role === 'SUPER_ADMIN'
