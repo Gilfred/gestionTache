@@ -65,7 +65,7 @@
               </div>
             </div>
             <div class="ml-4 flex-shrink-0 flex items-center gap-2">
-              <button v-if="canSubmit(task)" @click="submitTask(task.id)" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">Soumettre</button>
+              <button v-if="canSubmit(task)" @click="submitTask(task.id)" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">Tâche terminée</button>
               <button v-if="canRate(task)" @click="openRateModal(task)" class="bg-yellow-600 text-white px-3 py-1 rounded text-xs hover:bg-yellow-700">Noter</button>
               <button v-if="isAdmin || task.created_by === user.id" @click="editTask(task)" class="text-indigo-600 hover:text-indigo-900">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>

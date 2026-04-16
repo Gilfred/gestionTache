@@ -97,3 +97,23 @@ export const sendAdminNotificationEmail = async (
   L'équipe Task Manager`
   )
 }
+
+export const sendTaskSubmittedEmail = async (
+  email: string,
+  taskTitle: string,
+  userName: string,
+  timeliness: string
+) => {
+  await sendEmail(
+    email,
+    'Tâche terminée et soumise',
+    `Bonjour,
+
+  La tâche "${taskTitle}" a été marquée comme terminée par ${userName} (${timeliness}).
+
+  Veuillez vous connecter pour l'évaluer et lui attribuer une note.
+
+  Cordialement,
+  L'équipe Task Manager`
+  )
+}

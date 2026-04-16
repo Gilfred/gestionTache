@@ -23,7 +23,13 @@ export default defineEventHandler(async (event) => {
       email: true,
       role: true,
       isValidated: true,
-      created_at: true
+      created_at: true,
+      permissions: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
     }
   })
   return users

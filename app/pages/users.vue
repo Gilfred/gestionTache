@@ -49,21 +49,27 @@
               <span :class="user.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' : (user.role === 'RESPONSABLE' ? 'bg-indigo-100 text-indigo-800' : 'bg-blue-100 text-blue-800')" class="px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                 {{ user.role }}
               </span>
+              <div class="mt-1 flex flex-wrap gap-1">
+                <span v-for="p in user.permissions" :key="p.id" class="text-[10px] bg-gray-100 px-1 rounded text-gray-600">
+                  {{ p.name }}
+                </span>
+              </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span :class="user.isValidated ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 rounded-full text-xs font-bold">
                 {{ user.isValidated ? 'Validé' : 'En attente' }}
               </span>
             </td>
-            <td v-if="isSuperAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td v-if="isSuperAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">
               <button v-if="!user.isValidated" @click="validateUser(user.id)" class="text-indigo-600 hover:text-indigo-900 font-bold">Valider</button>
+              <button @click="openEditModal(user)" class="text-blue-600 hover:text-blue-900 font-bold">Modifier</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Modal -->
+    <!-- Create Modal -->
     <div v-if="showModal" class="fixed z-50 inset-0 overflow-y-auto">
       <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -108,6 +114,57 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div v-if="showEditModal" class="fixed z-50 inset-0 overflow-y-auto">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <form @submit.prevent="updateUser">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <h3 class="text-xl leading-6 font-bold text-gray-900 mb-6">Modifier l'Utilisateur: {{ editingUser?.name }}</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                  <select v-model="editForm.role" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm sm:text-sm p-3 border focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                    <option value="USER">Utilisateur</option>
+                    <option value="RESPONSABLE">Responsable</option>
+                    <option value="SUPER_ADMIN">Super Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Permissions</label>
+                  <div class="mt-2 space-y-2 max-h-40 overflow-y-auto p-2 border rounded-lg">
+                    <div v-for="permission in allPermissions" :key="permission.id" class="flex items-center">
+                      <input
+                        type="checkbox"
+                        :id="'perm-' + permission.id"
+                        :value="permission.id"
+                        v-model="editForm.permissions"
+                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      >
+                      <label :for="'perm-' + permission.id" class="ml-2 block text-sm text-gray-900">
+                        {{ permission.name }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse">
+              <button type="submit" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-indigo-600 text-base font-bold text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                Enregistrer les modifications
+              </button>
+              <button @click="showEditModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                Annuler
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -124,6 +181,7 @@ if (!isAdmin.value) {
 
 const { data: users, refresh } = await useFetch('/api/users')
 const { data: pendingUsers, refresh: refreshPending } = await useFetch('/api/users/pending')
+const { data: allPermissions } = await useFetch('/api/users/permissions')
 
 const userFilter = ref('all')
 const pendingCount = computed(() => pendingUsers.value?.length || 0)
@@ -136,12 +194,40 @@ const filteredUsers = computed(() => {
 })
 
 const showModal = ref(false)
+const showEditModal = ref(false)
+const editingUser = ref(null)
+
 const form = reactive({
   name: '',
   email: '',
   role: 'USER',
   password: 'password123'
 })
+
+const editForm = reactive({
+  role: 'USER',
+  permissions: []
+})
+
+const openEditModal = (user) => {
+  editingUser.value = user
+  editForm.role = user.role
+  editForm.permissions = user.permissions.map(p => p.id)
+  showEditModal.value = true
+}
+
+const updateUser = async () => {
+  try {
+    await $fetch(`/api/users/${editingUser.value.id}`, {
+      method: 'PUT',
+      body: editForm
+    })
+    await refresh()
+    showEditModal.value = false
+  } catch (e) {
+    alert(e.data?.statusMessage || 'Une erreur est survenue')
+  }
+}
 
 const createUser = async () => {
   try {
