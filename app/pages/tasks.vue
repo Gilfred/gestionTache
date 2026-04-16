@@ -295,7 +295,7 @@ const canRate = (task) => isSuperAdmin.value && task.status === 'SUBMITTED'
 
 const submitTask = async (id) => {
   try {
-    await $fetch(`/api/tasks/${id}.submit`, { method: 'POST' })
+    await $fetch(`/api/tasks/${id}/submit`, { method: 'POST' })
     await refreshTasks()
   } catch (e) {
     alert(e.data?.statusMessage || 'Une erreur est survenue')
@@ -310,7 +310,7 @@ const openRateModal = (task) => {
 
 const saveRating = async () => {
   try {
-    await $fetch(`/api/tasks/${ratingTask.value.id}.rate`, {
+    await $fetch(`/api/tasks/${ratingTask.value.id}/rate`, {
       method: 'POST',
       body: ratingForm
     })
