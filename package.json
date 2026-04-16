@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && prisma generate",
+    "vercel-build": "prisma migrate deploy && nuxt build",
     "db:fix-roles": "tsx prisma/migrate-roles.ts"
   },
   "dependencies": {
