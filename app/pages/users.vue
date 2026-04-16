@@ -123,16 +123,16 @@ if (!isAdmin.value) {
 }
 
 const { data: users, refresh } = await useFetch('/api/users')
+const { data: pendingUsers, refresh: refreshPending } = await useFetch('/api/users/pending')
 
 const userFilter = ref('all')
-const pendingCount = computed(() => users.value?.filter(u => !u.isValidated).length || 0)
+const pendingCount = computed(() => pendingUsers.value?.length || 0)
 
 const filteredUsers = computed(() => {
-  if (!users.value) return []
   if (userFilter.value === 'pending') {
-    return users.value.filter(u => !u.isValidated)
+    return pendingUsers.value || []
   }
-  return users.value
+  return users.value || []
 })
 
 const showModal = ref(false)
@@ -167,6 +167,7 @@ const validateUser = async (userId) => {
       body: { isValidated: true }
     })
     await refresh()
+    await refreshPending()
   } catch (e) {
     alert(e.data?.statusMessage || 'Une erreur est survenue')
   }

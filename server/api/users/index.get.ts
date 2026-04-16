@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
     select: {
       id: true,
       name: true,
-      email: (isSuperAdmin || isValidated) ? true : false,
+      email: true,
       role: true,
       isValidated: true,
       created_at: true
